@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 
 from django.contrib.auth.models import User
-from .serializers import PostSerializer, CommentSerializer, FollowSerializer, GroupSerializer
+
 from .models import Post, Comment, Group, Follow
 from .permissions import IsOwnerOrReadOnly
+from .serializers import PostSerializer, CommentSerializer, FollowSerializer, GroupSerializer
 
 
 class PostView(viewsets.ModelViewSet):
@@ -14,7 +15,7 @@ class PostView(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter]
-    search_fields = ['=group',]
+    search_fields = ['=group', ]
 
     def get_queryset(self):
         queryset = Post.objects.all()
@@ -55,8 +56,6 @@ class GroupView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
-
-
 class FollowView(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
@@ -67,10 +66,7 @@ class FollowView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         following = User.objects.get(username=self.request.data.get('following'))
         user = self.request.user
-        follower = Follow.objects.filter(user=user, following=following).count()
-        if follower > 0:
-            raise ValidationError
+        follower = Follow.objects.filter(user=user, following=following)
+        if follower.exists():
+            raise ValidationError('Вы подписаны на этого автора')
         serializer.save(user=user, following=following)
-
-
-

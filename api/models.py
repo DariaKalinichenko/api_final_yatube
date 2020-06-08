@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 User = get_user_model()
@@ -18,7 +19,8 @@ class Post(models.Model):
     text = models.TextField()
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True, verbose_name= (u'Группа'))
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('Группа'),
+                              related_name="group")
 
     def __str__(self):
         return self.text
